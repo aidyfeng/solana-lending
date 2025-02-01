@@ -4,6 +4,7 @@ use instructions::*;
 mod error;
 mod instructions;
 mod state;
+mod constants;
 
 declare_id!("9XCHC5dVRNSkZvmMNj9F9ZQXPfXYjD6BQH2trTtkqBs5");
 

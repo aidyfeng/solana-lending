@@ -1,4 +1,4 @@
-use std::ops::DerefMut;
+use std::{f64::consts::E, ops::DerefMut};
 
 use anchor_lang::prelude::*;
 use anchor_spl::{
@@ -63,8 +63,18 @@ pub fn process_withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
         user.deposited_sol
     };
 
-    if amount > deposited_value {
-        return Err(ErrorCode::InsufficientFunds.into());
+    let time_diff = Clock::get()?.unix_timestamp - user.last_updated;
+
+    //看不懂
+    let bank = ctx.accounts.bank.deref_mut();
+    bank.total_deposits = (bank.total_deposits as f64 * (E.powf(bank.instrest_rate * time_diff as f64))) as u64;
+
+    let value_per_share =  bank.total_deposits as f64 / bank.total_deposit_shares as f64;
+
+    let user_value = deposited_value as f64 / value_per_share;
+
+    if user_value < amount as f64 {
+        return Err(ErrorCode::InsufficientFunds.into())
     }
 
     let transfer_cpi_account = token_interface::TransferChecked {

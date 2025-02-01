@@ -1,6 +1,6 @@
+use crate::state::*;
 use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{Mint, TokenAccount, TokenInterface};
-use crate::state::*;
 
 #[derive(Accounts)]
 pub struct InitBank<'info> {
@@ -33,9 +33,9 @@ pub struct InitBank<'info> {
 }
 
 #[derive(Accounts)]
-pub struct InitUser<'info>{
+pub struct InitUser<'info> {
     #[account(mut)]
-    pub signer : Signer<'info>,
+    pub signer: Signer<'info>,
 
     #[account(
         init,
@@ -44,9 +44,9 @@ pub struct InitUser<'info>{
         seeds = [signer.key().as_ref()],
         bump
     )]
-    pub user_account:Account<'info,User>,
+    pub user_account: Account<'info, User>,
 
-    pub system_program : Program<'info,System>
+    pub system_program: Program<'info, System>,
 }
 
 pub fn process_init_bank(
@@ -59,10 +59,11 @@ pub fn process_init_bank(
     bank.authority = ctx.accounts.signer.key();
     bank.liquidation_threshold = liquidation_threshold;
     bank.max_ltv = max_ltv;
+    bank.instrest_rate = 0.05_f64; //Something wrong here
     Ok(())
 }
 
-pub fn process_init_user(ctx:Context<InitUser>,usdc_address:Pubkey) -> Result<()>{
+pub fn process_init_user(ctx: Context<InitUser>, usdc_address: Pubkey) -> Result<()> {
     let user_account = &mut ctx.accounts.user_account;
     user_account.owner = ctx.accounts.signer.key();
     user_account.usdc_address = usdc_address;

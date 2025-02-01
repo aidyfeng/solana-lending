@@ -27,5 +27,6 @@ pub struct Bank {
     pub liquidation_bonus : u64,
     pub liquidation_close_factor : u64,
     pub max_ltv : u64,
-    pub last_updated : i64
+    pub last_updated : i64,
+    pub instrest_rate : f64,
 }
