@@ -36,4 +36,12 @@ pub mod lending {
     pub fn borrow(ctx: Context<Borrow>, amount: u64) -> Result<()> {
         instructions::process_borrow(ctx, amount)
     }
+
+    pub fn repay(ctx: Context<Repay>, amount: u64) -> Result<()> {
+        instructions::process_repay(ctx, amount)
+    }
+
+    pub fn liquidate(ctx: Context<Liquidate>) -> Result<()> {
+        instructions::process_liquidate(ctx)
+    }
 }

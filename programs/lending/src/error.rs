@@ -6,4 +6,8 @@ pub enum ErrorCode {
     InsufficientFunds,
     #[msg("Over Borrowable Amount")]
     OverBorrowableAmount,
+    #[msg("Over Repay")]
+    OverRepay,
+    #[msg("User is not Under collateralized,can't be liquidated")]
+    NotUnderCollateralized,
 }

@@ -3,10 +3,13 @@ use std::f64::consts::E;
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
-    token_interface::{Mint, TokenAccount, TokenInterface},
+    token_interface::{self, Mint, TokenAccount, TokenInterface},
 };
 
-use crate::state::{Bank, User};
+use crate::{
+    error::ErrorCode,
+    state::{Bank, User},
+};
 
 #[derive(Accounts)]
 pub struct Repay<'info> {
@@ -58,10 +61,51 @@ pub fn process_repay(ctx: Context<Repay>, amount: u64) -> Result<()> {
         user.borrowed_sol
     };
 
-    let time_diff =  - user.last_updated_borrowed -  Clock::get()?.unix_timestamp;
+    let time_diff = -user.last_updated_borrowed - Clock::get()?.unix_timestamp;
 
     let bank = &mut ctx.accounts.repay_bank;
-    bank.total_borrowed = (bank.total_borrowed as f64 * (E.powf(bank.instrest_rate * time_diff as f64))) as u64;
+    bank.total_borrowed =
+        (bank.total_borrowed as f64 * (E.powf(bank.instrest_rate * time_diff as f64))) as u64;
 
-    todo!()
+    let value_per_share = bank.total_borrowed as f64 / bank.total_borrowed_shares as f64;
+
+    let user_value = borrow_value as f64 / value_per_share;
+
+    if amount as f64 > user_value {
+        return Err(ErrorCode::OverRepay.into());
+    }
+
+    //transfer token
+    let transfer_cpi_account = token_interface::TransferChecked {
+        from: ctx.accounts.user_token_account.to_account_info(),
+        mint: ctx.accounts.repay_mint.to_account_info(),
+        to: ctx.accounts.repay_bank_token_account.to_account_info(),
+        authority: ctx.accounts.repay_bank_token_account.to_account_info(),
+    };
+
+    let cip_ctx = CpiContext::new(
+        ctx.accounts.token_program.to_account_info(),
+        transfer_cpi_account,
+    );
+
+    token_interface::transfer_checked(cip_ctx, amount, ctx.accounts.repay_mint.decimals)?;
+
+    let borrow_radio = amount.checked_div(bank.total_borrowed).unwrap();
+    let user_shares = bank
+        .total_borrowed_shares
+        .checked_mul(borrow_radio)
+        .unwrap();
+
+    if ctx.accounts.repay_mint.key() == user.usdc_address {
+        user.borrowed_usdc -= amount;
+        user.borrowed_usdc_shares -= user_shares;
+    } else {
+        user.deposited_sol -= amount;
+        user.deposited_sol_shares -= user_shares;
+    }
+
+    bank.total_borrowed -= amount;
+    bank.total_borrowed_shares -= user_shares;
+
+    Ok(())
 }
