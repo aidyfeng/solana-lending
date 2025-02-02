@@ -5,7 +5,7 @@ use anchor_spl::{
     associated_token::AssociatedToken,
     token_interface::{self, Mint, TokenAccount, TokenInterface},
 };
-use pyth_solana_receiver_sdk::{cpi, price_update::{get_feed_id_from_hex, PriceUpdateV2}};
+use pyth_solana_receiver_sdk::price_update::{get_feed_id_from_hex, PriceUpdateV2};
 
 use crate::{
     constants::{self, SOL_USD_FEED_ID, USDC_USD_FEED_ID},
