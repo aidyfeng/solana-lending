@@ -63,7 +63,7 @@ pub fn process_withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
         user.deposited_sol
     };
 
-    let time_diff = Clock::get()?.unix_timestamp - user.last_updated;
+    let time_diff = user.last_updated - Clock::get()?.unix_timestamp;
 
     //看不懂
     let bank = ctx.accounts.bank.deref_mut();
