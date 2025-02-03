@@ -6,6 +6,7 @@ import { Program } from "@coral-xyz/anchor";
 import { PythSolanaReceiver } from "@pythnetwork/pyth-solana-receiver";
 import { Keypair } from "@solana/web3.js";
 import { BankrunProvider } from "anchor-bankrun";
+import { createMint } from "spl-token-bankrun";
 import { BankrunContextWrapper } from "../bankrun-utils/bankrunConnection";
 import { Lending } from "../target/types/lending";
 
@@ -18,6 +19,7 @@ describe("Lending Smart Contract Tests", async () => {
   let program: Program<Lending>;
   let banksClient: BanksClient;
   let signer: Keypair;
+  let usdcBankAccount : 
 
   const pyth = new PublicKey("7UVimffxr9ow1uXYxsr4LHAcV58mLzhmwaeKvJ1pjLiE");
 
@@ -57,4 +59,10 @@ describe("Lending Smart Contract Tests", async () => {
   program = new Program<Lending>(IDL as Lending, provider);
   banksClient = context.banksClient;
   signer = provider.wallet.payer;
+
+  const mintUSDC = await createMint(banksClient,signer,signer.publicKey,null,2);
+  
+  const mintSOL = await createMint(banksClient,signer,signer.publicKey,null,2);
+
+  
 });
