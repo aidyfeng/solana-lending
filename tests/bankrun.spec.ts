@@ -25,6 +25,8 @@ describe("Lending Smart Contract Tests", async () => {
   let usdcBankAccount:PublicKey; 
   let solBankAccount:PublicKey;
 
+  console.log("start to test ====")
+
   const pyth = new PublicKey("7UVimffxr9ow1uXYxsr4LHAcV58mLzhmwaeKvJ1pjLiE");
 
   const devnetConnection = new Connection("https://api.devnet.solana.com");
